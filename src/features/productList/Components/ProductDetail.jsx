@@ -5,7 +5,8 @@ import { RadioGroup } from '@headlessui/react'
 import { useDispatch, useSelector } from 'react-redux';
 import { useParams } from 'react-router-dom';
 import { fetchAllProductByIdAsync, selectProductById } from '../ProductSlice';
-
+import { selectLoggedInUser } from '../../Auth/AuthSlice';
+import { addToCartAsync,  } from '../../Cart/CartSlice';
 
 export default function ProductDetail(){
 const colors = [
@@ -39,6 +40,7 @@ function classNames(...classes) {
 
 const [selectedColor, setSelectedColor] = useState(colors[0]);
 const [selectedSize, setSelectedSize] = useState(sizes[2]);
+const user = useSelector(selectLoggedInUser)
 const product = useSelector(selectProductById);
 const dispatch = useDispatch();
 const params = useParams();
@@ -48,6 +50,11 @@ useEffect(() => {
 }, [dispatch, params.id]);
 
 
+const handleCart = (e)=>{
+  e.preventDefault();
+  dispatch(addToCartAsync({...product,quantity:1,user:user.id })) 
+}
+
   return (
     <div className="bg-white">
      {product && (<div className="pt-6">
@@ -55,7 +62,7 @@ useEffect(() => {
           <ol role="list" className="mx-auto flex max-w-2xl items-center space-x-2 px-4 sm:px-6 lg:max-w-7xl lg:px-8">
             {product.breadcrumbs && product.breadcrumbs.map((breadcrumb) => (
               <li key={breadcrumb.id}>
-                {console.log(product)}
+                
                 <div className="flex items-center">
                   <a href={breadcrumb.href} className="mr-2 text-sm font-medium text-gray-900">
                     {breadcrumb.name}
@@ -242,6 +249,7 @@ useEffect(() => {
               </div>
 
               <button
+              onClick={handleCart}
                 type="submit"
                 className="mt-10 flex w-full items-center justify-center rounded-md border border-transparent bg-indigo-600 px-8 py-3 text-base font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
               >
