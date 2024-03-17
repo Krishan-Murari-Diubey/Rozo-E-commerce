@@ -10,11 +10,12 @@ import {
   updateCartAsync,
 } from "../features/Cart/CartSlice";
 import {
-  selectLoggedInUser,
   updateUserAsync,
-} from "../features/Auth/AuthSlice";
+} from "../features/user/userSlice";
 import { useForm } from "react-hook-form";
 import { createOrderAsync, selectCurrentOrder } from "../features/order/OrderSlice";
+import { selectUserInfo } from "../features/user/userSlice";
+import { discountedPrice } from "../app/constants";
 
 const Address = [
   {
@@ -46,19 +47,19 @@ const ChekOutPage = () => {
   const [selectedAddress, setSelectedAddress] = useState(null);
   const [paymentMethod, setPaymentMethod] = useState("cash");
   const currentOrder = useSelector(selectCurrentOrder);
-  const user = useSelector(selectLoggedInUser);
+  const user = useSelector(selectUserInfo);
   const dispatch = useDispatch();
   const items = useSelector(selectItems);
+console.log(items)
+const totalAmount = items.reduce((amount, item) => {
+  return discountedPrice(item.product) * item.quantity + amount;
+}, 0);
 
-  const totalAmount = items.reduce((amount, item) => {
-
-    item.price * item.quantity + amount,0;
-  });
 
   const totalItems = items.reduce((total, item) => item.quantity + total, 0);
 
   const handleQuantity = (e, item) => {
-    dispatch(updateCartAsync({ ...item, quantity: +e.target.value }));
+    dispatch(updateCartAsync({ id:item.id, quantity: +e.target.value }));
   };
 
   const handleRemove = (e, id) => {
@@ -66,6 +67,7 @@ const ChekOutPage = () => {
   };
 
   const handleAddress = (e) => {
+   
     setSelectedAddress(user.addresses[e.target.value]);
   };
 
@@ -74,10 +76,10 @@ const ChekOutPage = () => {
       items,
       totalAmount,
       totalItems,
-      user,
+      user:user.id,
       paymentMethod,
       selectedAddress,
-      status:"Pending",
+      status:"Pending", 
     };
     dispatch(createOrderAsync(order));
   };
@@ -287,8 +289,10 @@ const ChekOutPage = () => {
                       >
                         <div className="flex min-w-0 gap-x-4">
                           <input
+                          onChange={handleAddress}
                             name="address"
                             type="radio"
+                            value={index}
                             className="h-4 w-4 border-gray-300 text-indigo-600 focus:ring-indigo-600"
                           />
                           <div className="min-w-0 flex-auto">
@@ -337,7 +341,7 @@ const ChekOutPage = () => {
                             htmlFor="push-everything"
                             className="block text-sm font-medium leading-6 text-gray-900"
                           >
-                            Chash
+                            Cash
                           </label>
                         </div>
                         <div className="flex items-center gap-x-3">
@@ -374,8 +378,8 @@ const ChekOutPage = () => {
                       <li key={item.id} className="flex py-6">
                         <div className="h-24 w-24 flex-shrink-0 overflow-hidden rounded-md border border-gray-200">
                           <img
-                            src={item[0].thumbnail}
-                            alt={item[0].title}
+                            src={item.product.thumbnail}
+                            alt={item.product.title}
                             className="h-full w-full object-cover object-center"
                           />
                         </div>
@@ -384,12 +388,12 @@ const ChekOutPage = () => {
                           <div>
                             <div className="flex justify-between text-base font-medium text-gray-900">
                               <h3>
-                                <a href={item[0].href}>{item[0].title}</a>
+                                <a href={item.product.href}>{item.product.title}</a>
                               </h3>
-                              <p className="ml-4">${item[0].price}</p>
+                              <p className="ml-4">${item.product.price}</p>
                             </div>
                             <p className="mt-1 text-sm text-gray-500">
-                              {item[0].brand}
+                              {item.product.brand}
                             </p>
                           </div>
                           <div className="flex flex-1 items-end justify-between text-sm">
@@ -402,7 +406,7 @@ const ChekOutPage = () => {
                               </label>
                               <select
                                 onChange={(e) => handleQuantity(e, item)}
-                                value={item[0].quantity}
+                                value={item.product.quantity}
                               >
                                 <option value="1">1</option>
                                 <option value="2">2</option>

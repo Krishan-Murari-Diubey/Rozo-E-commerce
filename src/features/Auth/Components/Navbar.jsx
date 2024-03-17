@@ -4,21 +4,21 @@ import { Bars3Icon, ShoppingCartIcon, XMarkIcon } from '@heroicons/react/24/outl
 import { Link } from 'react-router-dom'
 import { selectItems } from '../../Cart/CartSlice'
 import { useSelector } from 'react-redux'
-const user = {
-  name: 'Tom Cook',
-  email: 'tom@example.com',
-  imageUrl:
-    'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80',
-}
+import { selectLoggedInUser } from '../AuthSlice'
+
+
 const navigation = [
-  { name: 'Dashboard', href: '#', current: true },
-  { name: 'Team', href: '#', current: false },
+  { name: 'Dashboard', link: '#', user: true },
+  { name: 'Team', link: '#', user: true },
+  { name: 'Admin', link: '/admin', admin: true },
+  { name: 'Orders', link: '/admin/orders', admin: true },
   
 ]
 const userNavigation = [
-  { name: 'Your Profile', link: '/profile' },
+  { name: 'My Profile', link: '/profile' },
   { name: 'My Orders', link: '/orders' },
-  { name: 'Sign out', link: '/login' },
+  { name: 'Sign out', link: '/logout' },
+
 ]
 
 function classNames(...classes) {
@@ -27,6 +27,7 @@ function classNames(...classes) {
 
 export default function Navbar({children}) {
   const items = useSelector(selectItems);
+  const user = useSelector(selectLoggedInUser);
 
   return (
     <>
@@ -48,21 +49,23 @@ export default function Navbar({children}) {
                     </Link>
                     <div className="hidden md:block">
                       <div className="ml-10 flex items-baseline space-x-4">
-                        {navigation.map((item) => (
-                          <a
-                            key={item.name}
-                            href={item.href}
-                            className={classNames(
-                              item.current
-                                ? 'bg-gray-900 text-white'
-                                : 'text-gray-300 hover:bg-gray-700 hover:text-white',
-                              'rounded-md px-3 py-2 text-sm font-medium'
-                            )}
-                            aria-current={item.current ? 'page' : undefined}
-                          >
-                            {item.name}
-                          </a>
-                        ))}
+                      {navigation.map((item) =>
+                          item[user.role] ? (
+                            <Link
+                              key={item.name}
+                              to={item.link}
+                              className={classNames(
+                                item.current
+                                  ? 'bg-gray-900 text-white'
+                                  : 'text-gray-300 hover:bg-gray-700 hover:text-white',
+                                'rounded-md px-3 py-2 text-sm font-medium'
+                              )}
+                              aria-current={item.current ? 'page' : undefined}
+                            >
+                              {item.name}
+                            </Link>
+                          ) : null
+                        )}
                       </div>
                     </div>
                   </div>

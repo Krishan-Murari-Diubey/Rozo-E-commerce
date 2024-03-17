@@ -4,9 +4,11 @@ import { StarIcon } from '@heroicons/react/20/solid'
 import { RadioGroup } from '@headlessui/react'
 import { useDispatch, useSelector } from 'react-redux';
 import { useParams } from 'react-router-dom';
-import { fetchAllProductByIdAsync, selectProductById } from '../ProductSlice';
+import { fetchProductByIdAsync, selectProductById } from '../ProductSlice';
 import { selectLoggedInUser } from '../../Auth/AuthSlice';
-import { addToCartAsync,  } from '../../Cart/CartSlice';
+import { addToCartAsync, selectItems,  } from '../../Cart/CartSlice';
+import { discountedPrice } from '../../../app/constants';
+
 
 export default function ProductDetail(){
 const colors = [
@@ -44,15 +46,24 @@ const user = useSelector(selectLoggedInUser)
 const product = useSelector(selectProductById);
 const dispatch = useDispatch();
 const params = useParams();
+const items= useSelector(selectItems);
 
 useEffect(() => {
-  dispatch(fetchAllProductByIdAsync(params.id));
+  dispatch(fetchProductByIdAsync(params.id));
 }, [dispatch, params.id]);
-
 
 const handleCart = (e)=>{
   e.preventDefault();
-  dispatch(addToCartAsync({...product,quantity:1,user:user.id })) 
+  if(items.findIndex((item) => item.product.id === product.id) < 0){
+
+    const newItem = {...product,product: product.id,
+      quantity: 1,
+      user: user.id, }
+    dispatch(addToCartAsync(newItem)) 
+  }else{
+alert("Item Already added")
+  }
+
 }
 
   return (
@@ -88,7 +99,7 @@ const handleCart = (e)=>{
         <div className="mx-auto mt-6 max-w-2xl sm:px-6 lg:grid lg:max-w-7xl lg:grid-cols-3 lg:gap-x-8 lg:px-8">
           <div className="aspect-h-4 aspect-w-3 hidden overflow-hidden rounded-lg lg:block">
             <img
-              src={product[0].images[0]}
+              src={product.images[0]}
               alt={product.title}
               className="h-full w-full object-cover object-center"
             />
@@ -96,14 +107,14 @@ const handleCart = (e)=>{
           <div className="hidden lg:grid lg:grid-cols-1 lg:gap-y-8">
             <div className="aspect-h-2 aspect-w-3 overflow-hidden rounded-lg">
               <img
-                src={product[0].images[1]}
+                src={product.images[1]}
                 alt={product.title}
                 className="h-full w-full object-cover object-center"
               />
             </div>
             <div className="aspect-h-2 aspect-w-3 overflow-hidden rounded-lg">
               <img
-                src={product[0].images[2]}
+                src={product.images[2]}
                 alt={product.title}
                 className="h-full w-full object-cover object-center"
               />
@@ -111,7 +122,7 @@ const handleCart = (e)=>{
           </div>
           <div className="aspect-h-5 aspect-w-4 lg:aspect-h-4 lg:aspect-w-3 sm:overflow-hidden sm:rounded-lg">
             <img
-              src={product[0].images[3]}
+              src={product.images[3]}
               alt={product.title}
               className="h-full w-full object-cover object-center"
             />
@@ -127,7 +138,10 @@ const handleCart = (e)=>{
           {/* Options */}
           <div className="mt-4 lg:row-span-3 lg:mt-0">
             <h2 className="sr-only">Product information</h2>
-            <p className="text-3xl tracking-tight text-gray-900">${product[0].price}</p>
+            <p className="text-xl line-through tracking-tight text-gray-900">${product.price}</p>
+            <p className="text-3xl tracking-tight text-gray-900">
+                ${discountedPrice(product)}
+              </p>
 
             {/* Reviews */}
             <div className="mt-6">
@@ -286,7 +300,7 @@ const handleCart = (e)=>{
               <h2 className="text-sm font-medium text-gray-900">Details</h2>
 
               <div className="mt-4 space-y-6">
-                <p className="text-sm text-gray-600">{product[0].description}</p>
+                <p className="text-sm text-gray-600">{product.description}</p>
               </div>
             </div>
           </div>

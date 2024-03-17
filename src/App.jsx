@@ -25,7 +25,15 @@ import { fetchItemsByUserIdAsync } from './features/Cart/CartSlice'
 import PageNotFound from './Pages/404'
 import OrderSuccessPage from './Pages/OrderSuccessPage'
 import UserOrderPage from './Pages/UserOrderPage'
-
+import UserProfile from "../src/features/user/components/UserProfile"
+import { fetchLoggedInUserAsync } from './features/user/userSlice'
+import Logout from './features/Auth/Components/Logout'
+import ForgotPasswordPage from './Pages/ForgotPasswordPage'
+import ProtectedAdmin from './features/Auth/Components/ProtectedAdmin'
+import AdminHome from './Pages/AdminHome'
+import AdminProductDetailPage from './features/admin/components/AdminProductDetail'
+import AdminProductFormPage from './Pages/AdminProductFormPage'
+import AdminOrdersPage from './Pages/AdminOrdersPage'
 
 
 const router = createBrowserRouter([
@@ -67,6 +75,57 @@ const router = createBrowserRouter([
     path: '/orders',
     element: <UserOrderPage/>,
   },
+  {
+    path: '/profile',
+    element: <UserProfile/>,
+  },  {
+    path: '/logout',
+    element: <Logout/>,
+  },
+  {
+    path: '/forgot-password',
+    element: <ForgotPasswordPage/>,
+  },
+  {
+    path: '/admin',
+    element: (
+      <ProtectedAdmin>
+        <AdminHome></AdminHome>
+      </ProtectedAdmin>
+    ),
+  },
+  {
+    path: '/admin/product-detail/:id',
+    element: (
+      <ProtectedAdmin>
+        <AdminProductDetailPage></AdminProductDetailPage>
+      </ProtectedAdmin>
+    ),
+  },
+  {
+    path: '/admin/product-form',
+    element: (
+      <ProtectedAdmin>
+        <AdminProductFormPage></AdminProductFormPage>
+      </ProtectedAdmin>
+    ),
+  },
+  {
+    path: '/admin/product-form/edit/:id',
+    element: (
+      <ProtectedAdmin>
+        <AdminProductFormPage></AdminProductFormPage>
+      </ProtectedAdmin>
+    ),
+  },
+  {
+    path: '/admin/orders',
+    element: (
+      <ProtectedAdmin>
+        <AdminOrdersPage></AdminOrdersPage>
+      </ProtectedAdmin>
+    ),
+  },
 ]);
 
 function App() {
@@ -77,6 +136,7 @@ function App() {
   useEffect(()=>{
     if(user){
       dispatch(fetchItemsByUserIdAsync(user.id))
+      dispatch(fetchLoggedInUserAsync(user.id))
     }
   },[dispatch, user])
 

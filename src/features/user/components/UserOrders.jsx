@@ -1,24 +1,26 @@
 import React, { useEffect} from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { fetchLoggedInUserOrderAsync, selectUserOrders } from '../userSlice';
-import { selectLoggedInUser } from '../../Auth/AuthSlice';
+import { fetchLoggedInUserOrderAsync, selectUserInfo, selectUserOrders } from '../userSlice';
+import { discountedPrice } from '../../../app/constants';
+
 
 
 
 export default function UserOrders() {
   const dispatch = useDispatch();
-  const user = useSelector(selectLoggedInUser);
+  const userInfo = useSelector(selectUserInfo);
   const orders = useSelector(selectUserOrders);
 
   useEffect(() => {
-    dispatch(fetchLoggedInUserOrderAsync(user.id));
-  }, []);
+    dispatch(fetchLoggedInUserOrderAsync(userInfo.id));
+  }, [dispatch,userInfo]);
  
-  console.log(user)
+
   return (
     <div>
       {orders.map((order) => (
          <div>
+        
 <div>
         <div className="mx-auto mt-12 bg-white max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="border-t border-gray-200 px-4 py-6 sm:px-6">
@@ -34,8 +36,8 @@ export default function UserOrders() {
                   <li key={item.id} className="flex py-6">
                     <div className="h-24 w-24 flex-shrink-0 overflow-hidden rounded-md border border-gray-200">
                       <img
-                        src={item[0].thumbnail}
-                        alt={item[0].title}
+                        src={item.product.thumbnail}
+                        alt={item.product.title}
                         className="h-full w-full object-cover object-center"
                       />
                     </div>
@@ -44,12 +46,12 @@ export default function UserOrders() {
                       <div>
                         <div className="flex justify-between text-base font-medium text-gray-900">
                           <h3>
-                            <a href={item[0].href}>{item[0].title}</a>
+                            <a href={item.product.href}>{item.product.title}</a>
                           </h3>
-                          <p className="ml-4">${item[0].price}</p>
+                          <p className="ml-4">${discountedPrice(item.product.price)}</p>
                         </div>
                         <p className="mt-1 text-sm text-gray-500">
-                          {item[0].brand}
+                          {item.product.brand}
                         </p>
                       </div>
                       <div className="flex flex-1 items-end justify-between text-sm">
@@ -73,7 +75,6 @@ export default function UserOrders() {
               </ul>
             </div>
           </div>
-
           <div className="border-t border-gray-200 px-4 py-6 sm:px-6">
             <div className="flex justify-between my-2 text-base font-medium text-gray-900">
               <p>Subtotal</p>
@@ -93,22 +94,22 @@ export default function UserOrders() {
 
                       <div className="min-w-0 flex-auto">
                         <p className="text-sm font-semibold leading-6 text-gray-900">
-                          {order.user.addresses.name}
+                          {order.selectedAddress.name}
                         </p>
                         <p className="mt-1 truncate text-xs leading-5 text-gray-500">
-                          {order.user.addresses.street}
+                          {order.selectedAddress.street}
                         </p>
                         <p className="mt-1 truncate text-xs leading-5 text-gray-500">
-                          {order.user.addresses.pinCode}
+                          {order.selectedAddress.pinCode}
                         </p>
                       </div>
                     </div>
                     <div className="hidden sm:flex sm:flex-col sm:items-end">
                       <p className="text-sm leading-6 text-gray-900">
-                        Phone: {order.user.addresses.phone}
+                        Phone: {order.selectedAddress.phone}
                       </p>
                       <p className="text-sm leading-6 text-gray-500">
-                        {order.user.addresses.city}
+                        {order.selectedAddress.city}
                       </p>
                     </div>
                   </div>
